@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import connectMongoDB from './db/connectMongoDb.js';
 dotenv.config();
 const app=express();
+app.use(express.json()); // to parse req.body
+app.use(express.urlencoded({extended:true}))
 const port=process.env.PORT
 
 app.use("/api/auth",authRoutes)
