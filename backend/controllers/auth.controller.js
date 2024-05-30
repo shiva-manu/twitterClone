@@ -1,28 +1,32 @@
-import User from "../models/user.model.js";
-import bcrpyt from 'bcryptjs'
-export const signup=async (req,res)=>{
+import User from '../models/user.model.js';
+import bcrpyt from "bcryptjs";
+import {generateTokenAndSetCookie} from '../lib/utils/generateTokens.js';
+
+export const signup =async (req,res)=>{
    try{
-      const {fullName,userName,email,password}=req.body;
-      const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-      if (!emailRegex.test(email)) {
-         return res.status(400).json({ error: "Invalid email format" });
-       }
+      const {userName,fullName,email,password}=req.body;
+      const emailRegex=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if(!emailRegex.test(email)){
+         return res.status(400).json({error:"Invalid email format"});
+      }
       const existingUser=await User.findOne({userName});
       if(existingUser){
-         return res.status(400).json({error:"userName is already taken"});
+         return res.status(400).json({error:"Username is already taken"});
       }
       const existingEmail=await User.findOne({email});
       if(existingEmail){
          return res.status(400).json({error:"Email is already taken"});
       }
-      //hash passowrd
-      const salt=await bcrpyt.gensalt(10);
-      const hashedpassword=await bcrpyt.hash(password,salt);
+      if(password.length<6){
+         return res.status(400).json({error:"password must be a at least 6 characters long"});
+      }
+      const salt=await bcrpyt.genSalt(10);
+      const hashedPassword=await bcrpyt.hash(password,salt);
       const newUser=new User({
-         fullName:fullName,
-         userName:userName,
-         email:email,
-         password:hashedpassword,
+         fullName,
+         userName,
+         email,
+         password:hashedPassword
       });
       if(newUser){
          generateTokenAndSetCookie(newUser._id,res);
@@ -35,25 +39,25 @@ export const signup=async (req,res)=>{
             followers:newUser.followers,
             following:newUser.following,
             profileImg:newUser.profileImg,
-            coverImg:newUser.coverImg
+            coverImg:newUser.coverImg,
          })
       }
       else{
          res.status(400).json({error:"Invalid user data"});
       }
-      }catch(error){
+   }catch(error){
+      console.log("Error in signup controller",error.message);
       res.status(500).json({error:"Internal Server Error"});
    }
 }
-
 export const login=async(req,res)=>{
-   res.json({
-      data:"You hit the login endpoint",
-   });
-}
+   try{
 
+   }catch(error){
+      console.log(`Error in login controller:${error.message}`);
+      res.status(500).json({error:"Internal Server Error"})
+   }
+};
 export const logout=async(req,res)=>{
-   res.json({
-      data:"You hit the logput endpoint",
-   })
+   res.json({data:"You hit the logout endpoint"});
 }
