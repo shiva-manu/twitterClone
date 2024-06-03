@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import {v2 as cloudinary} from "cloudinary";
 import connectMongoDB from "./db/connectMongoDb.js";
 import cookieParser from "cookie-parser";
+import notificationRoute from './routes/notification.routes.js';
 
 dotenv.config();
 cloudinary.config({
@@ -21,7 +22,8 @@ app.use(express.json());
 app.use(cookieParser());
 app.use("/api/auth",authRoutes);
 app.use("/api/user",userRoutes);
-app.use("/api/posts",postRoutes)
+app.use("/api/posts",postRoutes);
+app.use("/api/notifications",notificationRoute);
 app.get("/",(req,res)=>{
    res.send("Server is ready");
 });
